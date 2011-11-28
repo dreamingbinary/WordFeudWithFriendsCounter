@@ -1,9 +1,8 @@
 <?php
+require_once('globals.php');
 
-if( isset($_POST['action']) ) 
-    $action = $_POST['action'];
-else 
-    $action = 'default';
+include_once('reload-game.php');
+
 
 if( isset($_POST['gametype']) ) 
     $gametype = $_POST['gametype'];
@@ -18,6 +17,17 @@ else
 body {font-size: 1em; font-family: Verdana;}
 h1 {font-size: 1.5em; color: red; }
 label {font-style: italic;}
+input[type="text"], textarea { 
+  font-family: "Courier New", monospace; 
+  font-size: 14px; 
+  font-weight: bold;
+  letter-spacing: 3px;
+}
+#saved-games{ border: 1px solid grey; padding: 5px 5px;  float: right; 
+  overflow: scroll;
+  width: 300px; min-height: 230px; max-height: 350px;
+  margin-top: -250px;
+}
 </style>
 </head>
 <body>
@@ -35,11 +45,33 @@ label {font-style: italic;}
 
 <label>Your tiles:</label><input type="text" name="yourtiles" value="<?php print isset($_POST['yourtiles'])?$_POST['yourtiles']:"";?>" />
 <br>
+Save game with name: <input type="text" name="game_name" value="<?PHP print isset($_POST['game_name']) ? $_POST['game_name'] : date("Ymd-"); ?>">
+<br>
 <input type="submit" />
 <input type="hidden" name="action" value="count" />
+
 </form>
+
+<div id='saved-games'>
+Saved Games
+<hr>
+<ul>
+<?php
+$files = scandir($tmp_dir);
+unset($files[0], $files[1]);#TODO: hack, this only applies to linux directories (".","..")?
+#print_r($files);
+foreach($files as $f){
+  print "<li><a href='?action=load&game_name=$f'>$f</a></li>";
+}
+?>
+</ul>
+</div>
 <?php 
 if( $action == 'count' ){
+
+    # saves the game state
+    include_once('save-game.php');
+
     if( $_POST['gametype'] == "wf" ){
         include('wordfeud.inc.php');
     }
@@ -120,7 +152,10 @@ if( $action == 'count' ){
         print "<strong>Total:</strong> " . ( $total ) ;
     print '</div>';
 }
-
+print '<hr>';
+print $message;
+#print '<hr>';
+#print_r($_POST);
 ?>
 </body>
 </html>
